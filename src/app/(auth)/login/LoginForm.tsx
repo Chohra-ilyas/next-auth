@@ -1,5 +1,8 @@
 "use client";
 
+import { loginAction } from "@/actions/auth.action";
+import Alert from "@/components/Alert";
+import Spinner from "@/components/spinner";
 import { loginSchema } from "@/utils/validationSchemas";
 import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
@@ -9,13 +12,37 @@ import { IoMdLogIn } from "react-icons/io";
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const [clientError, setClientError] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [serverSuccess, setServerSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const validation = loginSchema.safeParse({ email, password });
     if (!validation.success) {
-      console.error("Validation errors:", validation.error.errors[0].message);
-      
-      return;
+      return setClientError(validation.error.errors[0].message);
+    }
+    try {
+      setLoading(true);
+      setClientError("");
+      setServerError("");
+      setServerSuccess("");
+
+      loginAction({ email, password }).then((res) => {
+        if (res?.error) {
+          setServerError(res.error);
+        } else if (res?.message) {
+          setServerSuccess(res.message);
+        }
+      });
+    } finally {
+      setLoading(false);
+      setEmail("");
+      setPassword("");
+      setClientError("");
+      setServerError("");
     }
   };
 
@@ -57,12 +84,22 @@ const LoginForm = () => {
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
       </div>
-
+      {(clientError || serverError) && (
+        <Alert type="error" message={clientError || serverError} />
+      )}
+      {serverSuccess && <Alert type="success" message={serverSuccess} />}
       <button
+        disabled={loading}
         type="submit"
-        className="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold p-3 rounded-lg transition"
+        className="disabled:opacity-50 disabled:bg-gray-300 flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold p-3 rounded-lg transition"
       >
-        <IoMdLogIn className="text-xl" /> Login
+        {loading ? (
+          <Spinner />
+        ) : (
+          <>
+            <IoMdLogIn className="text-xl" /> Login
+          </>
+        )}
       </button>
 
       <div className="flex justify-center items-center gap-4 mt-2">

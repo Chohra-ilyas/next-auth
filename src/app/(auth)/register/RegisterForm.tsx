@@ -4,24 +4,53 @@ import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { IoMdPersonAdd } from "react-icons/io";
+import Alert from "@/components/Alert";
+import Spinner from "@/components/spinner";
+import { registerSchema } from "@/utils/validationSchemas"; // You’ll create this schema like loginSchema
+import { registerAction } from "@/actions/auth.action";    // You’ll create this action like loginAction
 
 const RegisterForm = () => {
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail]     = useState("");
   const [password, setPassword] = useState("");
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const [clientError, setClientError] = useState("");
+  const [serverError, setServerError] = useState("");
+  const [serverSuccess, setServerSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Username:", username);
-    console.log("Email:", email);
-    console.log("Password:", password);
+
+    const validation = registerSchema.safeParse({ username, email, password });
+    if (!validation.success) {
+      return setClientError(validation.error.errors[0].message);
+    }
+
+    try {
+      setLoading(true);
+      const res = await registerAction({ username, email, password });
+      if (res?.error) {
+        setServerError(res.error);
+      } else if (res?.message) {
+        setServerSuccess(res.message);
+      }
+    } finally {
+      setLoading(false);
+      setClientError("");
+      setUsername("");
+      setEmail("");
+      setPassword("");
+    }
   };
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-4 max-w-md mx-auto p-6 rounded-xl"
+    >
       <div>
-        <label
-          className="block mb-1 text-gray-700 font-semibold"
-          htmlFor="username"
-        >
+        <label className="block mb-1 text-gray-700 font-semibold" htmlFor="username">
           Username
         </label>
         <input
@@ -33,11 +62,9 @@ const RegisterForm = () => {
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
       </div>
+
       <div>
-        <label
-          className="block mb-1 text-gray-700 font-semibold"
-          htmlFor="email"
-        >
+        <label className="block mb-1 text-gray-700 font-semibold" htmlFor="email">
           Email
         </label>
         <input
@@ -49,11 +76,9 @@ const RegisterForm = () => {
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
       </div>
+
       <div>
-        <label
-          className="block mb-1 text-gray-700 font-semibold"
-          htmlFor="password"
-        >
+        <label className="block mb-1 text-gray-700 font-semibold" htmlFor="password">
           Password
         </label>
         <input
@@ -65,15 +90,41 @@ const RegisterForm = () => {
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
       </div>
+
+      {(clientError || serverError) && (
+        <Alert type="error" message={clientError || serverError} />
+      )}
+      {serverSuccess && <Alert type="success" message={serverSuccess} />}
+
       <button
+        disabled={loading}
         type="submit"
-        className="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold p-3 rounded-lg transition"
+        className="disabled:opacity-50 disabled:bg-gray-300 flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold p-3 rounded-lg transition"
       >
-        <IoMdPersonAdd className="text-xl" /> Register
+        {loading ? (
+          <Spinner />
+        ) : (
+          <>
+            <IoMdPersonAdd className="text-xl" /> Register
+          </>
+        )}
       </button>
-      <div className="flex items-center justify-center gap-4">
-        <FcGoogle size={24} className="cursor-pointer" />
-        <FaGithub size={24} className="cursor-pointer" />
+
+      <div className="flex justify-center items-center gap-4 mt-2">
+        <button
+          type="button"
+          className="flex items-center gap-2 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100 transition"
+        >
+          <FcGoogle className="text-xl" />
+          <span className="hidden sm:inline">Google</span>
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-2 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100 transition"
+        >
+          <FaGithub className="text-xl" />
+          <span className="hidden sm:inline">GitHub</span>
+        </button>
       </div>
     </form>
   );
