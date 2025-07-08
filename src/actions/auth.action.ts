@@ -3,40 +3,32 @@ import { prisma } from "@/utils/prisma";
 import { loginSchema, registerSchema } from "@/utils/validationSchemas";
 import z from "zod";
 import * as bcrypt from "bcryptjs";
+import { signIn, signOut } from "@/auth";
+import { AuthError } from "next-auth";
 
 export const loginAction = async (data: z.infer<typeof loginSchema>) => {
   const validation = loginSchema.safeParse(data);
   if (!validation.success) {
-    return { success: false, message: "email or password is invalid" };
+    return { success: false, message: "invalid credentials" };
   }
   const { email, password } = validation.data;
 
   try {
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
+    await signIn("credentials", {
+      email,
+      password,
     });
-
-    if (!user) {
-      return { success: false, message: "User not found" };
-    }
-
-    // Check password
-    if (!user.password) {
-      return { success: false, message: "Password not set for this user" };
-    }
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      return { success: false, message: "Invalid password" };
-    }
-
-    return { success: true, message: "Login successful", user };
   } catch (error) {
-    console.error("Login error:", error);
-    return { success: false, message: "An error occurred during login" };
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return { success: false, message: "Invalid email or password" };
+        default:
+          return { success: false, message: "An unexpected error occurred" };
+      }
+    }
   }
+  return { success: true, message: "Login successful" };
 };
 
 export const registerAction = async (data: z.infer<typeof registerSchema>) => {
@@ -64,11 +56,15 @@ export const registerAction = async (data: z.infer<typeof registerSchema>) => {
 
   const newUser = await prisma.user.create({
     data: {
-      username,
+      name: username,
       email,
       password: hashedPassword,
     },
   });
 
   return { success: true, message: "Registration successful", user: newUser };
+};
+
+export const logoutAction = async () => {
+  await signOut();
 };

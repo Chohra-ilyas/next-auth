@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { loginAction } from "@/actions/auth.action";
 import Alert from "@/components/Alert";
 import Spinner from "@/components/spinner";
@@ -10,6 +10,7 @@ import { FcGoogle } from "react-icons/fc";
 import { IoMdLogIn } from "react-icons/io";
 
 const LoginForm = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -18,35 +19,32 @@ const LoginForm = () => {
   const [serverSuccess, setServerSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const validation = loginSchema.safeParse({ email, password });
-    if (!validation.success) {
-      return setClientError(validation.error.errors[0].message);
-    }
-    try {
-      setLoading(true);
-      setClientError("");
-      setServerError("");
-      setServerSuccess("");
+  const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
 
-      loginAction({ email, password }).then((res) => {
+      const validation = loginSchema.safeParse({ email, password });
+      if (!validation.success) {
+        return setClientError(validation.error.errors[0].message);
+      }
+  
+      try {
+        setLoading(true);
+        const res = await loginAction({ email, password });
         if (!res?.success) {
           setServerSuccess("");
           setServerError(res.message);
         } else if (res?.success) {
           setServerError("");
           setServerSuccess(res.message);
+          router.replace("/profile");
         }
-      });
-    } finally {
-      setLoading(false);
-      setClientError("");
-      setServerError("");
-      setEmail("");
-      setPassword("");
-    }
-  };
+      } finally {
+        setLoading(false);
+        setClientError("");
+        setEmail("");
+        setPassword("");
+      }
+    };
 
   return (
     <form
