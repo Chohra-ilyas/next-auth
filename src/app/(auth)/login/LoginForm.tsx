@@ -31,18 +31,20 @@ const LoginForm = () => {
       setServerSuccess("");
 
       loginAction({ email, password }).then((res) => {
-        if (res?.error) {
-          setServerError(res.error);
-        } else if (res?.message) {
+        if (!res?.success) {
+          setServerSuccess("");
+          setServerError(res.message);
+        } else if (res?.success) {
+          setServerError("");
           setServerSuccess(res.message);
         }
       });
     } finally {
       setLoading(false);
-      setEmail("");
-      setPassword("");
       setClientError("");
       setServerError("");
+      setEmail("");
+      setPassword("");
     }
   };
 

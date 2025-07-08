@@ -30,9 +30,11 @@ const RegisterForm = () => {
     try {
       setLoading(true);
       const res = await registerAction({ username, email, password });
-      if (res?.error) {
-        setServerError(res.error);
-      } else if (res?.message) {
+      if (!res?.success) {
+        setServerSuccess("");
+        setServerError(res.message);
+      } else if (res?.success) {
+        setServerError("");
         setServerSuccess(res.message);
       }
     } finally {
