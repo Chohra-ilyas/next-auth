@@ -39,30 +39,34 @@ export const registerAction = async (data: z.infer<typeof registerSchema>) => {
 
   const { username, email, password } = validation.data;
 
-  // Check if user already exists
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
+  try {
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
-  if (existingUser) {
-    return { success: false, message: "User already exists" };
+    if (existingUser) {
+      return { success: false, message: "User already exists" };
+    }
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = await prisma.user.create({
+      data: {
+        name: username,
+        email,
+        password: hashedPassword,
+      },
+    });
+
+    return { success: true, message: "Registration successful", user: newUser };
+  } catch (error) {
+    return { success: false, message: "An error occurred during registration" };
   }
-
-  // Hash the password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
-  const newUser = await prisma.user.create({
-    data: {
-      name: username,
-      email,
-      password: hashedPassword,
-    },
-  });
-
-  return { success: true, message: "Registration successful", user: newUser };
 };
 
 export const logoutAction = async () => {

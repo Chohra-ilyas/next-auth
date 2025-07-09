@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth as middleware } from "./auth";
+import authConfig from "./auth.config";
+import NextAuth from "next-auth";
+
+const { auth: middleware } = NextAuth(authConfig);
 
 const authRoutes = ["/login", "/register"];
 const protectedRoutes = ["/profile", "/"];
