@@ -65,6 +65,7 @@ export const registerAction = async (data: z.infer<typeof registerSchema>) => {
 
     return { success: true, message: "Registration successful", user: newUser };
   } catch (error) {
+    console.log("Registration error:", error);
     return { success: false, message: "An error occurred during registration" };
   }
 };
