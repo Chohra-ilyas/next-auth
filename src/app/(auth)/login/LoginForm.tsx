@@ -5,9 +5,8 @@ import Alert from "@/components/Alert";
 import Spinner from "@/components/spinner";
 import { loginSchema } from "@/utils/validationSchemas";
 import { useState } from "react";
-import { FaGithub } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
 import { IoMdLogIn } from "react-icons/io";
+import SocialProviders from "@/components/SocialProviders";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -101,24 +100,7 @@ const LoginForm = () => {
           </>
         )}
       </button>
-
-      <div className="flex justify-center items-center gap-4 mt-2">
-        <button
-          type="button"
-          className="flex items-center gap-2 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100 transition"
-        >
-          <FcGoogle className="text-xl" />
-          <span className="hidden sm:inline">Google</span>
-        </button>
-
-        <button
-          type="button"
-          className="flex items-center gap-2 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100 transition"
-        >
-          <FaGithub className="text-xl" />
-          <span className="hidden sm:inline">GitHub</span>
-        </button>
-      </div>
+      <SocialProviders />
     </form>
   );
 };

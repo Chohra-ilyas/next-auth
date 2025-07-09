@@ -8,7 +8,6 @@ const ProfilePage = async () => {
     <section className="flex items-center justify-center min-h-[60vh] px-4">
       {session?.user && (
         <div className="w-full max-w-md bg-white shadow-md rounded-xl p-6 text-center">
-          <p>{JSON.stringify(session)}</p>
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Profile</h1>
           <p className="text-gray-700 mb-2">
             Welcome, <span className="font-semibold">{session.user.name}</span>!

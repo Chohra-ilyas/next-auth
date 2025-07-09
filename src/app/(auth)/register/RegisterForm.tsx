@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { FaGithub } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
 import { IoMdPersonAdd } from "react-icons/io";
 import Alert from "@/components/Alert";
 import Spinner from "@/components/spinner";
 import { registerSchema } from "@/utils/validationSchemas"; // You’ll create this schema like loginSchema
 import { registerAction } from "@/actions/auth.action";    // You’ll create this action like loginAction
+import SocialProviders from "@/components/SocialProviders";
 
 const RegisterForm = () => {
   const [username, setUsername] = useState("");
@@ -112,22 +111,7 @@ const RegisterForm = () => {
         )}
       </button>
 
-      <div className="flex justify-center items-center gap-4 mt-2">
-        <button
-          type="button"
-          className="flex items-center gap-2 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100 transition"
-        >
-          <FcGoogle className="text-xl" />
-          <span className="hidden sm:inline">Google</span>
-        </button>
-        <button
-          type="button"
-          className="flex items-center gap-2 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100 transition"
-        >
-          <FaGithub className="text-xl" />
-          <span className="hidden sm:inline">GitHub</span>
-        </button>
-      </div>
+      <SocialProviders />
     </form>
   );
 };
