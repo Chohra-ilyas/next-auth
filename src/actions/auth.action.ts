@@ -5,6 +5,7 @@ import z from "zod";
 import * as bcrypt from "bcryptjs";
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
+import { generateVerificationToken } from "@/utils/generateToken";
 
 export const loginAction = async (data: z.infer<typeof loginSchema>) => {
   const validation = loginSchema.safeParse(data);
@@ -12,6 +13,22 @@ export const loginAction = async (data: z.infer<typeof loginSchema>) => {
     return { success: false, message: "invalid credentials" };
   }
   const { email, password } = validation.data;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user || !user.password) {
+    return { success: false, message: "invalid credentials" };
+  }
+
+  if (!user.emailVerified) {
+    const verificationToken = await generateVerificationToken(email);
+    return {
+      success: true,
+      message: "we sent you a verification email, please check your inbox",
+    };
+  }
 
   try {
     await signIn("credentials", {
@@ -63,7 +80,10 @@ export const registerAction = async (data: z.infer<typeof registerSchema>) => {
       },
     });
 
-    return { success: true, message: "Registration successful", user: newUser };
+    const verificationToken = await generateVerificationToken(email);
+    console.log(verificationToken);
+
+    return { success: true, message: "email sent, verify your email" };
   } catch (error) {
     console.log("Registration error:", error);
     return { success: false, message: "An error occurred during registration" };

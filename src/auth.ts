@@ -17,6 +17,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") return true;
+      const existingUser = await prisma.user.findUnique({
+        where: { id: user.id },
+      });
+      if (!existingUser?.emailVerified) {
+        return false;
+      }
+      return true;
+    },
   },
   events: {
     async linkAccount({ user }) {
@@ -26,7 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           emailVerified: new Date(),
         },
       });
-    }
+    },
   },
   adapter: PrismaAdapter(prisma),
   session: {

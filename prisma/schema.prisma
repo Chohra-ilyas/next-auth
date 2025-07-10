@@ -39,8 +39,17 @@ model User {
   password      String?
   emailVerified DateTime? @map("email_verified")
   image         String?
-  role          Role     @default(USER)
+  role          Role      @default(USER)
   accounts      Account[]
 
   @@map("users")
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
 }
