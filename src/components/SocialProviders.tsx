@@ -8,14 +8,27 @@ type Provider = "google" | "github";
 
 const SocialProviders = () => {
   const socialLoginHandler = (provider: Provider) => {
-    signIn(provider, {
-      redirectTo: "/profile",
-    });
+    if (provider !== "google" && provider !== "github") {
+      console.error("Unsupported provider");
+      return;
+    }
+    if (provider === "google") {
+      signIn("google", {
+        redirectTo: "/profile",
+      });
+      return;
+    } else {
+      signIn("github", {
+        redirectTo: "/profile",
+      });
+      return;
+    }
   };
 
   return (
     <div className="flex justify-center items-center gap-4 mt-2">
       <button
+        onClick={() => socialLoginHandler("google")}
         type="button"
         className="flex items-center gap-2 border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100 transition"
       >
