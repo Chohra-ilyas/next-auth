@@ -6,6 +6,7 @@ import * as bcrypt from "bcryptjs";
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 import { generateVerificationToken } from "@/utils/generateToken";
+import { sendVerificationToken } from "@/utils/mail";
 
 export const loginAction = async (data: z.infer<typeof loginSchema>) => {
   const validation = loginSchema.safeParse(data);
@@ -14,23 +15,27 @@ export const loginAction = async (data: z.infer<typeof loginSchema>) => {
   }
   const { email, password } = validation.data;
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (!user || !user.password) {
-    return { success: false, message: "invalid credentials" };
-  }
-
-  if (!user.emailVerified) {
-    const verificationToken = await generateVerificationToken(email);
-    return {
-      success: true,
-      message: "we sent you a verification email, please check your inbox",
-    };
-  }
-
   try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user || !user.password) {
+      return { success: false, message: "invalid credentials" };
+    }
+
+    if (!user.emailVerified) {
+      const verificationToken = await generateVerificationToken(email);
+      // send the verification email with the token
+      await sendVerificationToken(
+        verificationToken.email,
+        verificationToken.token
+      );
+      return {
+        success: true,
+        message: "we sent you a verification email, please check your inbox",
+      };
+    }
     await signIn("credentials", {
       email,
       password,
@@ -81,6 +86,12 @@ export const registerAction = async (data: z.infer<typeof registerSchema>) => {
     });
 
     const verificationToken = await generateVerificationToken(email);
+    // send the verification email with the token
+    await sendVerificationToken(
+      verificationToken.email,
+      verificationToken.token
+    );
+
     console.log(verificationToken);
 
     return { success: true, message: "email sent, verify your email" };
