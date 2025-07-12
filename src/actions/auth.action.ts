@@ -92,8 +92,6 @@ export const registerAction = async (data: z.infer<typeof registerSchema>) => {
       verificationToken.token
     );
 
-    console.log(verificationToken);
-
     return { success: true, message: "email sent, verify your email" };
   } catch (error) {
     console.log("Registration error:", error);
