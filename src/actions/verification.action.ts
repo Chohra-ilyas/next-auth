@@ -1,8 +1,9 @@
 "use server";
 
 import { prisma } from "@/utils/prisma";
+import { ActionType } from "@/utils/types";
 
-export const verifyEmailAction = async (token: string) => {
+export const verifyEmailAction = async (token: string): Promise<ActionType> => {
   try {
     const verificationToken = await prisma.verificationToken.findUnique({
       where: { token },

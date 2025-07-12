@@ -18,3 +18,20 @@ export const sendVerificationToken = async (email: string, token: string) => {
         </div>`,
   });
 };
+
+export const sendPasswordResetEmail = async (email: string, token: string) => {
+  const resetUrl = `${process.env.DOMAIN}/reset-password?token=${token}`;
+  return resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: email,
+    subject: "Reset your password",
+    html: `
+        <div>
+            <h1>Reset your password</h1>
+            <p>To reset your password, please click the link below:</p>
+            <a href="${resetUrl}">Reset Password</a>
+            <p>If you did not request a password reset, you can ignore this email.</p>
+            <p>Thank you!</p>
+        </div>`,
+  });
+};
