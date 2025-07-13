@@ -1,17 +1,19 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Alert from "@/components/Alert";
 import Spinner from "@/components/spinner";
 import { useState } from "react";
-import { CiMail } from "react-icons/ci";
 import Link from "next/link";
-import { forgotPasswordSchema } from "@/utils/validationSchemas";
-import { z } from "zod";
-import { forgotPasswordAction } from "@/actions/password.action";
+import { GrPowerReset } from "react-icons/gr";
+import { resetPasswordSchema } from "@/utils/validationSchemas";
+import { resetPasswordAction } from "@/actions/password.action";
 
-const ForgotPasswordForm = () => {
+const ResetPasswordForm = () => {
+  const params = useSearchParams();
+  const token = params.get("token");
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [clientError, setClientError] = useState("");
   const [serverError, setServerError] = useState("");
   const [serverSuccess, setServerSuccess] = useState("");
@@ -20,21 +22,24 @@ const ForgotPasswordForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validation = forgotPasswordSchema.safeParse({ email });
+    const validation = resetPasswordSchema.safeParse({ newPassword, confirmPassword });
     if (!validation.success) {
       return setClientError(validation.error.errors[0].message);
     }
+    console.log("Token:", token);
+    if (!token) {
+      return setClientError("Invalid or missing token");
+    }
     setLoading(true);
-    forgotPasswordAction({ email })
+    resetPasswordAction({ newPassword, confirmPassword }, token)
       .then((response) => {
         if (response.success) {
           setServerSuccess(response.message);
           setServerError("");
           setClientError("");
-          setEmail(""); // Clear email input on success
           setTimeout(() => {
             router.push("/login");
-          }, 2000); // Redirect after 2 seconds
+          }, 2000);
         } else {
           setServerError(response.message);
           setServerSuccess("");
@@ -57,16 +62,32 @@ const ForgotPasswordForm = () => {
       <div>
         <label
           className="block mb-1 text-gray-700 font-semibold"
-          htmlFor="email"
+          htmlFor="newPassword"
         >
-          Email
+          New Password
         </label>
         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          id="email"
-          placeholder="Enter your email"
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          id="newPassword"
+          placeholder="Enter your new password"
+          className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+        />
+      </div>
+      <div>
+        <label
+          className="block mb-1 text-gray-700 font-semibold"
+          htmlFor="confirmPassword"
+        >
+          Confirm New Password
+        </label>
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          id="confirmPassword"
+          placeholder="Confirm your new password"
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
       </div>
@@ -84,7 +105,7 @@ const ForgotPasswordForm = () => {
           <Spinner />
         ) : (
           <>
-            <CiMail className="text-xl" /> Submit
+            <GrPowerReset className="text-xl" /> Reset
           </>
         )}
       </button>
@@ -100,4 +121,4 @@ const ForgotPasswordForm = () => {
   );
 };
 
-export default ForgotPasswordForm;
+export default ResetPasswordForm;

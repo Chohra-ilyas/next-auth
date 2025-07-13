@@ -26,3 +26,16 @@ export const loginSchema = z.object({
 export const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }).trim(),
 });
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(6, { message: "New password must be at least 6 characters long" })
+      .max(100)
+      .trim(),
+    confirmPassword: z.string().trim(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "new password and confirm password must match",
+  });
