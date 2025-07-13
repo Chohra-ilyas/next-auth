@@ -1,5 +1,6 @@
 import { logoutAction } from "@/actions/auth.action";
 import { auth } from "@/auth";
+import ToggleTwoStep from "./ToggleTwoStep";
 
 const ProfilePage = async () => {
   const session = await auth();
@@ -22,6 +23,7 @@ const ProfilePage = async () => {
               Logout
             </button>
           </form>
+          {session.user.id && <ToggleTwoStep userId={session.user.id} isTwoStepEnabled={session.user.isTwoStepEnabled} />}
         </div>
       )}
 

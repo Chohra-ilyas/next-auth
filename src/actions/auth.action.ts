@@ -107,3 +107,20 @@ export const registerAction = async (
 export const logoutAction = async (): Promise<void> => {
   await signOut();
 };
+
+//toggle Two Step
+export const toggleTwoStepAction = async (
+  userId: string,
+  isEnabled: boolean
+): Promise<ActionType> => {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isTwoStepEnabled: isEnabled },
+    });
+    return { success: true, message: "Two-Step Verification updated" };
+  } catch (error) {
+    console.log("Toggle Two-Step error:", error);
+    return { success: false, message: "An error occurred while updating" };
+  }
+};

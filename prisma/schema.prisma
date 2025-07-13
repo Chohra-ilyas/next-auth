@@ -41,7 +41,8 @@ model User {
   image         String?
   role          Role      @default(USER)
   accounts      Account[]
-
+  twoStepConfirmation TwoStepConfirmation?
+  isTwoStepEnabled Boolean @default(false)
   @@map("users")
 }
 
@@ -61,4 +62,19 @@ model resetPasswordToken {
   expires DateTime
 
   @@unique([email, token])
+}
+
+model TwoStepVerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoStepConfirmation {
+  id      String   @id @default(cuid())
+  userId   String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

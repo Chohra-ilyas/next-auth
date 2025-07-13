@@ -13,6 +13,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
         if (user) {
           session.user.role = user.role;
+          session.user.isTwoStepEnabled = user.isTwoStepEnabled;
         }
       }
       return session;
