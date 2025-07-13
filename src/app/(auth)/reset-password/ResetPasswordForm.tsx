@@ -7,13 +7,16 @@ import Link from "next/link";
 import { GrPowerReset } from "react-icons/gr";
 import { resetPasswordSchema } from "@/utils/validationSchemas";
 import { resetPasswordAction } from "@/actions/password.action";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const ResetPasswordForm = () => {
   const params = useSearchParams();
   const token = params.get("token");
   const router = useRouter();
   const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [clientError, setClientError] = useState("");
   const [serverError, setServerError] = useState("");
   const [serverSuccess, setServerSuccess] = useState("");
@@ -22,7 +25,10 @@ const ResetPasswordForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validation = resetPasswordSchema.safeParse({ newPassword, confirmPassword });
+    const validation = resetPasswordSchema.safeParse({
+      newPassword,
+      confirmPassword,
+    });
     if (!validation.success) {
       return setClientError(validation.error.errors[0].message);
     }
@@ -59,7 +65,7 @@ const ResetPasswordForm = () => {
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 max-w-md mx-auto p-6 rounded-xl"
     >
-      <div>
+      <div className="relative">
         <label
           className="block mb-1 text-gray-700 font-semibold"
           htmlFor="newPassword"
@@ -67,15 +73,26 @@ const ResetPasswordForm = () => {
           New Password
         </label>
         <input
-          type="password"
+          type={showNewPassword ? "text" : "password"}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           id="newPassword"
           placeholder="Enter your new password"
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
+        {showNewPassword ? (
+          <FaEyeSlash
+            className="absolute right-3 top-12 transform -translate-y-1/6 cursor-pointer"
+            onClick={() => setShowNewPassword(!showNewPassword)}
+          />
+        ) : (
+          <FaEye
+            className="absolute right-3 top-12 transform -translate-y-1/6 cursor-pointer"
+            onClick={() => setShowNewPassword(!showNewPassword)}
+          />
+        )}
       </div>
-      <div>
+      <div className="relative">
         <label
           className="block mb-1 text-gray-700 font-semibold"
           htmlFor="confirmPassword"
@@ -83,13 +100,24 @@ const ResetPasswordForm = () => {
           Confirm New Password
         </label>
         <input
-          type="password"
+          type={showConfirmPassword ? "text" : "password"}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           id="confirmPassword"
           placeholder="Confirm your new password"
           className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
+        {showConfirmPassword ? (
+          <FaEyeSlash
+            className="absolute right-3 top-12 transform -translate-y-1/6 cursor-pointer"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          />
+        ) : (
+          <FaEye
+            className="absolute right-3 top-12 transform -translate-y-1/6 cursor-pointer"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          />
+        )}
       </div>
 
       {(clientError || serverError) && (
