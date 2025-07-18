@@ -26,6 +26,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!existingUser?.emailVerified) {
         return false;
       }
+      if (existingUser?.isTwoStepEnabled) {
+        const twoStepToken = await prisma.twoStepConfirmation.findFirst({
+          where: { userId: user.id },
+        });
+        if (!twoStepToken) {
+          return false;
+        }
+        await prisma.twoStepConfirmation.delete({
+          where: { id: twoStepToken.id },
+        });
+      }
       return true;
     },
   },

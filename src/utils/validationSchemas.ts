@@ -21,6 +21,8 @@ export const loginSchema = z.object({
     .min(6, { message: "Password must be at least 6 characters long" })
     .max(100)
     .trim(),
+    code: z
+    .string().optional()
 });
 
 export const forgotPasswordSchema = z.object({

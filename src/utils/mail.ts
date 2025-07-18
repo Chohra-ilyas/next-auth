@@ -35,3 +35,19 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
         </div>`,
   });
 };
+
+export const sendTwoStepVerificationEmail = async (email: string, token: string) => {
+  await resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: email,
+    subject: "Two-step verification",
+    html: `
+        <div>
+            <h1>Two-step verification</h1>
+            <p>To complete your login, please enter the following code:</p>
+            <h2>${token}</h2>
+            <p>If you did not request this code, you can ignore this email.</p>
+            <p>Thank you!</p>
+        </div>`,
+  });
+};
