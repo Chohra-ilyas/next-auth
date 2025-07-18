@@ -1,7 +1,8 @@
 import { logoutAction } from "@/actions/auth.action";
 import { auth } from "@/auth";
 import ToggleTwoStep from "./ToggleTwoStep";
-
+import ClientProfile from "./ClientProfile";
+import { SessionProvider } from "next-auth/react";
 const ProfilePage = async () => {
   const session = await auth();
 
@@ -24,6 +25,9 @@ const ProfilePage = async () => {
             </button>
           </form>
           {session.user.id && <ToggleTwoStep userId={session.user.id} isTwoStepEnabled={session.user.isTwoStepEnabled} />}
+          <SessionProvider session={session}>
+            <ClientProfile />
+          </SessionProvider>
         </div>
       )}
 
